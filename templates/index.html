@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Language Results</title>
+    
+    <!-- CWASA CSS -->
+    <link rel="stylesheet" href="http://vhg.cmp.uea.ac.uk/tech/jas/vhg2021/cwa/cwasa.css" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0f0f;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 450px;
+            gap: 20px;
+        }
+
+        /* Right side - Avatar section */
+        .avatar-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .avatar-section {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #333;
+        }
+
+        .avatar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        .avatar-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .live-indicator {
+            background: #28a745;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .sync-indicator {
+            background: #17a2b8;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .sync-indicator.active {
+            background: #ffc107;
+            color: #000;
+        }
+
+        /* Main avatar display area */
+        .avatar-container {
+            width: 100%;
+            height: 450px;
+            background: #000;
+            border: 2px solid #333;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Hide ALL CWASA controls and UI elements */
+        .CWASAPanel .CWASAControls,
+        .CWASAPanel .divCtrlPanel,
+        .CWASAPanel .spanPlayA,
+        .CWASAPanel .spanSpeed,
+        .CWASAPanel .divSiGML,
+        .CWASAPanel .spanSiGMLCtrlA,
+        .CWASAPanel .spanSiGMLCtrlB,
+        .CWASAPanel .spanInfo,
+        .CWASAPanel hr,
+        .CWASAPanel br,
+        .CWASAPanel select,
+        .CWASAPanel input,
+        .CWASAPanel button {
+            display: none !important;
+            visibility: hidden !important;
+        }
+
+        .CWASAPanel {
+            width: 100% !important;
+            height: 100% !important;
+            background: transparent !important;
+            border: none !important;
+        }
+
+        /* Make sure only the avatar canvas is visible */
+        .CWASAPanel canvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block !important;
+            visibility: visible !important;
+        }
+
+        /* Custom control panel */
+        .control-panel {
+            background: #222;
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid #333;
+        }
+
+        .control-section {
+            margin-bottom: 15px;
+        }
+
+        .control-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-section h4 {
+            font-size: 14px;
+            color: #ccc;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Sync control section */
+        .sync-controls {
+            background: #2d2d2d;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #444;
+        }
+
+        .sync-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .sync-mode-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        /* Primary controls */
+        .primary-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .secondary-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: #5a6fd8;
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            background: #444;
+            cursor: not-allowed;
+            transform: none;
+            opacity: 0.6;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            font-size: 14px;
+            padding: 14px 20px;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: #c82333;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: #218838;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+        }
+
+        .btn-info:hover:not(:disabled) {
+            background: #138496;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .btn-warning:hover:not(:disabled) {
+            background: #e0a800;
+        }
+
+        .btn.active {
+            background: #ffc107;
+            color: #000;
+            box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+        }
+
+        /* Speed control */
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: #333;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .speed-control label {
+            font-size: 12px;
+            color: #ccc;
+            min-width: 45px;
+        }
+
+        .speed-slider {
+            flex: 1;
+            height: 4px;
+            background: #555;
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        #speedDisplay {
+            font-size: 12px;
+            color: #fff;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        /* Status display */
+        .status {
+            padding: 12px 15px;
+            border-radius: 6px;
+            background: #2d2d2d;
+            border-left: 4px solid #667eea;
+            font-size: 13px;
+            margin-bottom: 15px;
+            min-height: 45px;
+            display: flex;
+            align-items: center;
+        }
+
+        .status.success {
+            border-left-color: #28a745;
+            background: #1a3d1a;
+        }
+
+        .status.error {
+            border-left-color: #dc3545;
+            background: #3d1a1a;
+        }
+
+        .status.warning {
+            border-left-color: #ffc107;
+            background: #3d3d1a;
+        }
+
+        .status.sync {
+            border-left-color: #17a2b8;
+            background: #1a2d3d;
+        }
+
+        /* Left side - Video Player */
+        .video-section {
+            background: #1a1a1a;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .video-player {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .video-placeholder {
+            color: #666;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .video-controls {
+            padding: 20px;
+            background: #1a1a1a;
+            border-top: 1px solid #333;
+        }
+
+        .video-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .video-meta {
+            color: #aaa;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Text sections below the main content */
+        .text-sections {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            grid-column: 1 / -1;
+        }
+
+        .text-card {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #333;
+        }
+
+        .text-card h3 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .text-content {
+            background: #0f0f0f;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            line-height: 1.6;
+            color: #ccc;
+        }
+
+        .isl-words {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .word-tag {
+            background: #667eea;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(26, 26, 26, 0.9);
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid #333;
+            z-index: 1000;
+        }
+
+        .back-btn:hover {
+            background: rgba(102, 126, 234, 0.9);
+            transform: translateY(-2px);
+        }
+
+        /* Progress indicator */
+        .progress-info {
+            background: #333;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #ccc;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .avatar-sidebar {
+                order: -1;
+            }
+            
+            .avatar-container {
+                height: 400px;
+            }
+            
+            .text-sections {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 10px;
+            }
+            
+            .primary-controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .secondary-controls {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .avatar-container {
+                height: 350px;
+            }
+            
+            .sync-mode-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-btn">← New Conversion</a>
+    
+    <div class="header">
+        <h1>🤟 Sign Language Live Translation</h1>
+    </div>
+
+    <div class="main-container">
+        <!-- Left side - Video Player -->
+        <div class="video-section">
+            <div class="video-container">
+                <video class="video-player" id="mediaPlayer" controls style="display: none;">
+                    <source src="{{ media_url }}" type="video/mp4">
+                    <source src="{{ media_url }}" type="audio/mpeg">
+                    Your browser does not support the video/audio element.
+                </video>
+                <div class="video-placeholder" id="videoPlaceholder">
+                    📁 Upload a video or audio file to play here
+                </div>
+            </div>
+            <div class="video-controls">
+                <div class="video-title" id="videoTitle">Demo Media File</div>
+                <div class="video-meta">
+                    <span>Sign Language Translation</span>
+                    <span class="live-indicator">DEMO</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right side - Avatar section -->
+        <div class="avatar-sidebar">
+            <div class="avatar-section">
+                <div class="avatar-header">
+                    <h2 class="avatar-title">Sign Language Avatar</h2>
+                    <div style="display: flex; gap: 8px;">
+                        <span class="live-indicator">READY</span>
+                        <span class="sync-indicator" id="syncIndicator">MANUAL</span>
+                    </div>
+                </div>
+
+                <!-- Sync Controls -->
+                <div class="sync-controls">
+                    <div class="sync-header">
+                        <h4 style="margin: 0; color: #17a2b8;">🔄 Synchronization Mode</h4>
+                    </div>
+                    <div class="sync-mode-buttons">
+                        <button class="btn btn-info active" onclick="setSyncMode('manual')" id="manualModeBtn">
+                            🎯 Manual Control
+                        </button>
+                        <button class="btn btn-warning" onclick="setSyncMode('auto')" id="autoModeBtn">
+                            🔄 Auto Sync
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Main avatar display -->
+                <div class="avatar-container">
+                    <div class="CWASAPanel av0"></div>
+                    <div class="SToCA" style="display: none;"></div>
+                </div>
+
+                <!-- Progress indicator -->
+                <div class="progress-info" id="progressInfo">
+                    Ready to play • 0 of 0 signs
+                </div>
+
+                <!-- Primary controls -->
+                <div class="primary-controls">
+                    <button class="btn btn-primary" onclick="playAllSigns()" id="playBtn">
+                        ▶️ Play All Signs
+                    </button>
+                    <button class="btn btn-danger" onclick="stopSigning()" id="stopBtn">
+                        ⏹️ Stop
+                    </button>
+                </div>
+
+                <!-- Secondary controls -->
+                <div class="secondary-controls">
+                    <button class="btn btn-secondary" onclick="pauseSigning()" id="pauseBtn">
+                        ⏸️ Pause
+                    </button>
+                    <button class="btn btn-secondary" onclick="resumeSigning()" id="resumeBtn">
+                        ▶️ Resume
+                    </button>
+                    <button class="btn btn-secondary" onclick="playCurrentWord()" id="currentWordBtn">
+                        🔄 Current
+                    </button>
+                </div>
+
+                <!-- Navigation controls -->
+                <div class="control-section">
+                    <h4>Navigation</h4>
+                    <div class="secondary-controls">
+                        <button class="btn btn-secondary" onclick="prevSign()" id="prevBtn">
+                            ← Previous
+                        </button>
+                        <button class="btn btn-secondary" onclick="nextSign()" id="nextBtn">
+                            Next →
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetToStart()">
+                            ⏮️ Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Speed control -->
+                <div class="control-section">
+                    <h4>Playback Speed</h4>
+                    <div class="speed-control">
+                        <label>Speed:</label>
+                        <input type="range" class="speed-slider" id="speedSlider" min="-10" max="10" value="0" onchange="changeSpeed(this.value)">
+                        <span id="speedDisplay">Normal</span>
+                    </div>
+                </div>
+
+                <!-- Status display -->
+                <div class="status" id="statusDiv">
+                    Avatar ready! Select sync mode and click "Play All Signs" to start.
+                </div>
+            </div>
+        </div>
+
+        <!-- Text sections below the main content -->
+        <div class="text-sections">
+            <div class="text-card">
+                <h3>📝 Original Text</h3>
+                <div class="text-content" id="originalText">
+                    {{ text }}
+                </div>
+            </div>
+
+            <div class="text-card">
+                <h3>🔤 ISL Format</h3>
+                <div class="text-content">
+                    {% for sentence in isl_text %}
+                        <div class="isl-words">
+                            {% for word in sentence %}
+                                <span class="word-tag">{{ word }}</span>
+                            {% endfor %}
+                        </div>
+                        {% if not loop.last %}<br>{% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CWASA JavaScript -->
+    <script type="text/javascript" src="http://vhg.cmp.uea.ac.uk/tech/jas/vhg2021/cwa/allcsa.js"></script>
+
+<script>
+        // Global variables
+        let sigmlFiles = {{ flat_sigml_files | tojson | safe }};
+        let currentSignIndex = 0;
+        let isPlaying = false;
+        let isPaused = false;
+        let playInterval;
+        let currentSpeed = 0;
+        let syncMode = 'manual'; // 'manual' or 'auto'
+        let mediaPlayer = null;
+        let videoSyncListener = null;
+        let lastVideoTime = 0;
+
+        console.log("SiGML Files:", sigmlFiles);
+
+        // Initialize everything when page loads
+        window.onload = function() {
+            console.log("Page loaded, initializing...");
+            initMediaPlayer();
+            initCWASA();
+            updateButtons();
+            updateProgressInfo();
+        };
+
+        // Initialize media player
+        function initMediaPlayer() {
+            mediaPlayer = document.getElementById('mediaPlayer');
+            const placeholder = document.getElementById('videoPlaceholder');
+            
+            if (mediaPlayer && (mediaPlayer.src || '{{ media_url }}')) {
+                mediaPlayer.style.display = 'block';
+                placeholder.style.display = 'none';
+                
+                // Add event listeners for synchronization
+                mediaPlayer.addEventListener('play', onVideoPlay);
+                mediaPlayer.addEventListener('pause', onVideoPause);
+                mediaPlayer.addEventListener('ended', onVideoEnd);
+                mediaPlayer.addEventListener('seeked', onVideoSeeked);
+                mediaPlayer.addEventListener('timeupdate', onVideoTimeUpdate);
+                
+                updateStatus("Media player initialized", "success");
+            } else {
+                updateStatus("No media file available", "warning");
+            }
+        }
+
+        // Set synchronization mode
+        function setSyncMode(mode) {
+            syncMode = mode;
+            const manualBtn = document.getElementById('manualModeBtn');
+            const autoBtn = document.getElementById('autoModeBtn');
+            const syncIndicator = document.getElementById('syncIndicator');
+            
+            if (mode === 'manual') {
+                manualBtn.classList.add('active');
+                autoBtn.classList.remove('active');
+                syncIndicator.textContent = 'MANUAL';
+                syncIndicator.className = 'sync-indicator';
+                updateStatus("Manual control mode activated", "sync");
+                
+                // Remove video event listeners for sync
+                if (mediaPlayer) {
+                    mediaPlayer.removeEventListener('play', onVideoPlaySync);
+                    mediaPlayer.removeEventListener('pause', onVideoPauseSync);
+                }
+            } else {
+                autoBtn.classList.add('active');
+                manualBtn.classList.remove('active');
+                syncIndicator.textContent = 'SYNCED';
+                syncIndicator.className = 'sync-indicator active';
+                updateStatus("Auto-sync mode activated - Avatar will sync with video", "sync");
+                
+                // Add video event listeners for sync
+                if (mediaPlayer) {
+                    mediaPlayer.addEventListener('play', onVideoPlaySync);
+                    mediaPlayer.addEventListener('pause', onVideoPauseSync);
+                }
+            }
+        }
+
+        // Video event handlers for manual mode
+        function onVideoPlay() {
+            console.log("Video started playing");
+        }
+
+        function onVideoPause() {
+            console.log("Video paused");
+        }
+
+        function onVideoEnd() {
+            console.log("Video ended");
+            if (syncMode === 'auto' && isPlaying) {
+                stopSigning();
+            }
+        }
+
+        function onVideoSeeked() {
+            console.log("Video seeked to:", mediaPlayer.currentTime);
+            if (syncMode === 'auto') {
+                // Calculate which sign should be playing based on video time
+                syncSignToVideoTime(mediaPlayer.currentTime);
+            }
+        }
+
+        function onVideoTimeUpdate() {
+            lastVideoTime = mediaPlayer.currentTime;
+        }
+
+        // Video event handlers for auto-sync mode
+        function onVideoPlaySync() {
+            if (syncMode === 'auto' && !isPlaying) {
+                updateStatus("Auto-starting signs to sync with video", "sync");
+                playAllSigns();
+            }
+        }
+
+        function onVideoPauseSync() {
+            if (syncMode === 'auto' && isPlaying && !isPaused) {
+                updateStatus("Auto-pausing signs to sync with video", "sync");
+                pauseSigning();
+            }
+        }
+
+        // Sync sign to video time (basic implementation)
+        function syncSignToVideoTime(videoTime) {
+            if (sigmlFiles.length === 0) return;
+            
+            // Simple calculation: distribute signs evenly over video duration
+            const videoDuration = mediaPlayer.duration || 60; // fallback to 60 seconds
+            const signDuration = videoDuration / sigmlFiles.length;
+            const targetSignIndex = Math.floor(videoTime / signDuration);
+            
+            if (targetSignIndex !== currentSignIndex && targetSignIndex < sigmlFiles.length) {
+                currentSignIndex = Math.max(0, Math.min(targetSignIndex, sigmlFiles.length - 1));
+                updateProgressInfo();
+                
+                if (isPlaying && !isPaused) {
+                    playCurrentWord();
+                }
+            }
+        }
+
+        // Initialize CWASA when page loads
+        function initCWASA() {
+            const config = {
+                useClientConfig: true,
+                avSettings: [{
+                    width: 375,
+                    height: 450,
+                    avList: "avs",
+                    initAv: "anna",
+                    ambIdle: true,
+                    allowFrameSteps: true,
+                    allowSiGMLText: false,
+                    initSpeed: 0,
+                    rateSpeed: 5,
+                    background: null
+                }]
+            };
+            
+            CWASA.init(config);
+            
+            CWASA.ready.then(() => {
+                updateStatus("Avatar ready! 🎉 Choose sync mode and start playing.", "success");
+                console.log("CWASA initialized successfully");
+                
+                // Add avatar ready hook
+                CWASA.addHook('avatarready', function(msg, av) {
+                    console.log("Avatar loaded:", msg);
+                }, 0);
+            }).catch((error) => {
+                updateStatus("Error initializing avatar: " + error, "error");
+                console.error("CWASA error:", error);
+            });
+        }
+
+        // Play all signs sequentially
+        function playAllSigns() {
+            if (sigmlFiles.length === 0) {
+                updateStatus("No SiGML files to play", "error");
+                return;
+            }
+
+            currentSignIndex = 0;
+            isPlaying = true;
+            isPaused = false;
+            updateButtons();
+            
+            const modeText = syncMode === 'auto' ? 
+                `Starting synchronized playback of ${sigmlFiles.length} signs with video...` :
+                `Starting manual playback of ${sigmlFiles.length} signs...`;
+            updateStatus(modeText, "sync");
+            
+            playNextSign();
+        }
+
+        // Play next sign in sequence
+        function playNextSign() {
+            if (!isPlaying || isPaused || currentSignIndex >= sigmlFiles.length) {
+                if (currentSignIndex >= sigmlFiles.length) {
+                    updateStatus("All signs completed! 🎉", "success");
+                    isPlaying = false;
+                    updateButtons();
+                }
+                return;
+            }
+
+            const currentFile = sigmlFiles[currentSignIndex];
+            const wordName = getWordFromPath(currentFile);
+            updateStatus(`Playing sign ${currentSignIndex + 1} of ${sigmlFiles.length}: ${wordName}`, "sync");
+            updateProgressInfo();
+
+            // Load and play SiGML file
+            fetch(currentFile)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(sigmlContent => {
+                    CWASA.playSiGMLText(sigmlContent, 0);
+                    
+                    // Calculate delay based on content length and speed
+                    let baseDelay = estimateSignDuration(sigmlContent);
+                    
+                    // Adjust delay based on sync mode
+                    if (syncMode === 'auto' && mediaPlayer && mediaPlayer.duration) {
+                        const videoDuration = mediaPlayer.duration;
+                        const avgSignDuration = (videoDuration / sigmlFiles.length) * 1000; // Convert to ms
+                        baseDelay = Math.min(baseDelay, avgSignDuration);
+                    }
+                    
+                    const speedMultiplier = Math.pow(2, -currentSpeed / 5);
+                    const delay = Math.max(500, baseDelay * speedMultiplier);
+                    
+                    setTimeout(() => {
+                        currentSignIndex++;
+                        playNextSign();
+                    }, delay);
+                })
+                .catch(error => {
+                    console.error(`Error loading SiGML file ${currentFile}:`, error);
+                    updateStatus(`Error loading sign: ${wordName}`, "error");
+                    
+                    // Skip to next sign after error
+                    setTimeout(() => {
+                        currentSignIndex++;
+                        playNextSign();
+                    }, 1000);
+                });
+        }
+
+        // Estimate sign duration based on SiGML content
+        function estimateSignDuration(sigmlContent) {
+            const signCount = (sigmlContent.match(/<hamgestural_sign/g) || []).length;
+            const baseTime = Math.max(1000, signCount * 2000);
+            
+            // Adjust for sync mode
+            if (syncMode === 'auto') {
+                return Math.min(baseTime, 3000); // Cap at 3 seconds for better sync
+            }
+            return baseTime;
+        }
+
+        // Get word from file path
+        function getWordFromPath(path) {
+            return path.split('/').pop().replace('.sigml', '');
+        }
+
+        // Control functions
+        function stopSigning() {
+            isPlaying = false;
+            isPaused = false;
+            currentSignIndex = 0;
+            CWASA.stopSiGML(0);
+            updateStatus("Signing stopped", "warning");
+            updateButtons();
+            updateProgressInfo();
+        }
+
+        function pauseSigning() {
+            if (isPlaying && !isPaused) {
+                isPaused = true;
+                CWASA.stopSiGML(0);
+                updateStatus("Signing paused", "warning");
+                updateButtons();
+            }
+        }
+
+        function resumeSigning() {
+            if (isPlaying && isPaused) {
+                isPaused = false;
+                updateStatus("Signing resumed", "sync");
+                updateButtons();
+                playNextSign();
+            }
+        }
+
+        // Play current word only
+        function playCurrentWord() {
+            if (currentSignIndex >= sigmlFiles.length) return;
+            
+            const currentFile = sigmlFiles[currentSignIndex];
+            const wordName = getWordFromPath(currentFile);
+            updateStatus(`Playing current sign: ${wordName}`, "sync");
+            
+            fetch(currentFile)
+                .then(response => response.text())
+                .then(sigmlContent => {
+                    CWASA.playSiGMLText(sigmlContent, 0);
+                })
+                .catch(error => {
+                    console.error(`Error loading SiGML file ${currentFile}:`, error);
+                    updateStatus(`Error loading sign: ${wordName}`, "error");
+                });
+        }
+
+        // Navigation functions
+        function previousSign() {
+            if (currentSignIndex > 0) {
+                currentSignIndex--;
+                updateProgressInfo();
+                if (!isPlaying) {
+                    playCurrentWord();
+                }
+            }
+        }
+
+        function nextSign() {
+            if (currentSignIndex < sigmlFiles.length - 1) {
+                currentSignIndex++;
+                updateProgressInfo();
+                if (!isPlaying) {
+                    playCurrentWord();
+                }
+            }
+        }
+
+        // Speed control
+        function changeSpeed(delta) {
+            currentSpeed = Math.max(-10, Math.min(10, currentSpeed + delta));
+            CWASA.setSpeed(currentSpeed, 0);
+            updateStatus(`Speed: ${currentSpeed > 0 ? '+' : ''}${currentSpeed}`, "sync");
+            updateSpeedDisplay();
+        }
+
+        function resetSpeed() {
+            currentSpeed = 0;
+            CWASA.setSpeed(0, 0);
+            updateStatus("Speed reset to normal", "sync");
+            updateSpeedDisplay();
+        }
+
+        // UI Update functions
+        function updateButtons() {
+            const playBtn = document.getElementById('playBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const resumeBtn = document.getElementById('resumeBtn');
+            
+            if (playBtn) playBtn.disabled = isPlaying;
+            if (pauseBtn) pauseBtn.disabled = !isPlaying || isPaused;
+            if (stopBtn) stopBtn.disabled = !isPlaying && !isPaused;
+            if (resumeBtn) resumeBtn.disabled = !isPaused;
+            
+            // Update navigation buttons
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            if (prevBtn) prevBtn.disabled = currentSignIndex === 0;
+            if (nextBtn) nextBtn.disabled = currentSignIndex >= sigmlFiles.length - 1;
+        }
+
+        function updateProgressInfo() {
+            const progressInfo = document.getElementById('progressInfo');
+            const progressBar = document.getElementById('progressBar');
+            
+            if (sigmlFiles.length > 0) {
+                const currentWord = getWordFromPath(sigmlFiles[currentSignIndex]);
+                const progress = ((currentSignIndex + 1) / sigmlFiles.length) * 100;
+                
+                if (progressInfo) {
+                    progressInfo.textContent = `${currentSignIndex + 1} / ${sigmlFiles.length}: ${currentWord}`;
+                }
+                
+                if (progressBar) {
+                    progressBar.style.width = `${progress}%`;
+                }
+            } else {
+                if (progressInfo) progressInfo.textContent = "No signs loaded";
+                if (progressBar) progressBar.style.width = "0%";
+            }
+        }
+
+        function updateSpeedDisplay() {
+            const speedDisplay = document.getElementById('speedDisplay');
+            if (speedDisplay) {
+                speedDisplay.textContent = `${currentSpeed > 0 ? '+' : ''}${currentSpeed}`;
+            }
+        }
+
+        function updateStatus(message, type = 'info') {
+            const statusElement = document.getElementById('status');
+            if (statusElement) {
+                statusElement.textContent = message;
+                statusElement.className = `status ${type}`;
+                
+                // Auto-clear status after 5 seconds for non-error messages
+                if (type !== 'error') {
+                    setTimeout(() => {
+                        if (statusElement.textContent === message) {
+                            statusElement.textContent = 'Ready';
+                            statusElement.className = 'status';
+                        }
+                    }, 5000);
+                }
+            }
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+                return; // Don't interfere with form inputs
+            }
+            
+            switch(event.code) {
+                case 'Space':
+                    event.preventDefault();
+                    if (isPlaying && !isPaused) {
+                        pauseSigning();
+                    } else if (isPaused) {
+                        resumeSigning();
+                    } else {
+                        playAllSigns();
+                    }
+                    break;
+                case 'ArrowLeft':
+                    event.preventDefault();
+                    previousSign();
+                    break;
+                case 'ArrowRight':
+                    event.preventDefault();
+                    nextSign();
+                    break;
+                case 'ArrowUp':
+                    event.preventDefault();
+                    changeSpeed(1);
+                    break;
+                case 'ArrowDown':
+                    event.preventDefault();
+                    changeSpeed(-1);
+                    break;
+                case 'KeyS':
+                    event.preventDefault();
+                    stopSigning();
+                    break;
+                case 'KeyR':
+                    event.preventDefault();
+                    resetSpeed();
+                    break;
+                case 'Digit1':
+                    event.preventDefault();
+                    setSyncMode('manual');
+                    break;
+                case 'Digit2':
+                    event.preventDefault();
+                    setSyncMode('auto');
+                    break;
+            }
+        });
+
+        // Export functions for global access
+        window.playAllSigns = playAllSigns;
+        window.stopSigning = stopSigning;
+        window.pauseSigning = pauseSigning;
+        window.resumeSigning = resumeSigning;
+        window.previousSign = previousSign;
+        window.nextSign = nextSign;
+        window.changeSpeed = changeSpeed;
+        window.resetSpeed = resetSpeed;
+        window.setSyncMode = setSyncMode;
+        window.playCurrentWord = playCurrentWord;
+    </script>
+</body>
+</html>

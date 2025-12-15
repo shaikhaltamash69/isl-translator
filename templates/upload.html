@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Real-Time Speech-to-Sign Translator</title>
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background: linear-gradient(135deg, #2c3e50, #4ca1af);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #1c1f26;
+            color: #fff;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            width: 500px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #4ca1af;
+        }
+        p.description {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #b0bec5;
+        }
+        label {
+            display: block;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #eceff1;
+        }
+        input[type="file"] {
+            display: block;
+            margin: 0 auto 20px auto;
+            padding: 10px;
+            border: 2px dashed #4ca1af;
+            border-radius: 10px;
+            background: #2e3440;
+            color: #fff;
+            width: 100%;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s, background 0.3s;
+        }
+        input[type="file"]:hover {
+            border-color: #1abc9c;
+            background: #37414b;
+        }
+        button {
+            background: linear-gradient(135deg, #1abc9c, #16a085);
+            color: #fff;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: background 0.3s, transform 0.2s;
+            width: 100%;
+        }
+        button:hover {
+            background: linear-gradient(135deg, #16a085, #1abc9c);
+        }
+        button:active {
+            transform: scale(0.96);
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #b0bec5;
+        }
+        .footer a {
+            color: #1abc9c;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI-Powered Speech-to-Sign Translator</h1>
+        <p class="description">Upload an audio or video file to convert spoken words into sign language in real-time.</p>
+        <form action="/upload" method="POST" enctype="multipart/form-data">
+            <label for="file">Choose an audio or video file:</label>
+            <input type="file" name="file" id="file" required>
+            <button type="submit">Upload & Translate</button>
+        </form>
+        <div class="footer">
+            <p>Need help? <a href="#">Contact Support</a></p>
+        </div>
+    </div>
+</body>
+</html>
