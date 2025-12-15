@@ -2,6 +2,7 @@
 # Fix for macOS OpenMP / Stanza pthread crash
 import os
 os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 os.environ["STANZA_USE_TOKENIZER"] = "spacy"
 # =========================
