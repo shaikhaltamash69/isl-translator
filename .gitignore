@@ -1,5 +1,13 @@
 venv/
 __pycache__/
-*.pyc
 static/uploads/
-.stanza_resources/
+stanza_resources/
+stanford-parser-full-2020-11-17/
+ejml-0.23/
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.wav
+*.mp3
+.DS_Store
