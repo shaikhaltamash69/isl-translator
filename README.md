@@ -2,57 +2,144 @@
 
 Sign Language Live Translation is a Flask-based web application that converts spoken audio or video content into Indian Sign Language (ISL) animations. The system uses a Whisper-based transcription engine, linguistic processing with Stanza, and a sign avatar that plays SiGML files generated from the processed text.
 
-## Project goals
+---
 
-- Enable real-time or offline conversion of audio and video into ISL to improve accessibility for Deaf and Hard of Hearing users.
-- Build a modular pipeline that separates transcription, text-to-ISL conversion, and avatar rendering so each stage can be improved independently.
-- Iterate daily on model quality, ISL grammar handling, and user experience while keeping the repository production ready.
+## Project Goals
 
-## Tech stack
+- Enable real-time or offline conversion of audio and video into ISL to improve accessibility for Deaf and Hard of Hearing users
+- Build a modular pipeline separating transcription, text-to-ISL conversion, and avatar rendering so each stage can be improved independently
+- Continuously improve ISL grammar handling, model quality, and user experience while keeping the repository production-ready
 
-- Backend: Python, Flask application in `main.py` exposing upload and processing routes.
-- Speech-to-text: `faster-whisper` small model for efficient audio and video transcription.
-- NLP and grammar: Stanza pipeline (with spaCy tokenizer) plus custom ISL reordering, stop-word filtering, and suffix handling.
-- Frontend: HTML templates in `templates/` with a media player, transcription view, and ISL output panel styled via static assets under `static/`.
-- Assets: Pre-generated SiGML sign files stored in `static/SignFiles`, with user uploads stored in `static/uploads`.
+---
 
-## Core features
+## Tech Stack
 
-- File upload endpoint that accepts common audio and video formats (`mp4`, `mov`, `mp3`, `wav`, `avi`, `mkv`, `m4a`, `aac`, `flac`).
-- Robust upload handling with unique filenames, server-side validation, and optional cleanup endpoint for temporary media.
-- Transcription pipeline that joins Whisper segments into a single text transcript for each uploaded file.
-- Text-to-ISL engine that:
-  - Cleans punctuation and normalizes word forms.
-  - Removes non-essential stop words while preserving connectors important for sign language semantics.
-  - Reorders tokens into an ISL-friendly structure (time, topic, subject, object, verb, questions/emotions).
-  - Maps processed words to SiGML sign files used by the avatar.
+- **Backend**: Python, Flask (`main.py`)
+- **Speech-to-Text**: `faster-whisper` (small model)
+- **NLP & Grammar Processing**:
+  - Stanza (dependency parsing, POS tagging)
+  - spaCy (tokenization)
+  - Custom ISL grammar rules (reordering, stop-word filtering, suffix handling)
+- **Frontend**: HTML templates with CSS and JavaScript
+- **Assets**:
+  - SiGML sign files for avatar animation
+  - Temporary media uploads stored locally
 
-## Repository structure
+---
 
-- `main.py`: Flask application, transcription pipeline, ISL conversion logic, and file management utilities.
-- `templates/`:
-  - `upload.html`: Landing page for uploading audio or video.
-  - `index.html`: Results page showing the original media, transcript, ISL format, and synchronized avatar controls.
-- `static/`:
-  - `css/`, `js/`: Frontend styling and client-side scripts.
-  - `SignFiles/`: SiGML files for individual signs and phrases.
-  - `uploads/`: Temporary directory for user-uploaded media.
-- `stanza_resources/`: Local Stanza model directory for English processing.
-- `requirements.txt`: Python dependencies including Flask, faster-whisper, and Stanza.   
+## Core Features
 
-## Local development
+- Upload support for common audio and video formats:
+  `mp4`, `mov`, `mp3`, `wav`, `avi`, `mkv`, `m4a`, `aac`, `flac`
+- Secure upload handling with unique filenames and server-side validation
+- Automatic speech transcription using Whisper
+- Text-to-ISL conversion engine that:
+  - Cleans punctuation and normalizes words
+  - Removes non-essential stop words while preserving ISL semantics
+  - Reorders words into ISL-friendly grammar structure
+  - Maps processed words to corresponding SiGML sign files
 
-1. Create and activate a virtual environment.
-2. Install dependencies:  
-   `pip install -r requirements.txt`   
-3. Ensure `stanza_resources/` and `static/SignFiles` exist or are populated on first run.
-4. Start the server:  
-   `python main.py` (Flask app runs on `http://127.0.0.1:5000`).
-5. Open `/` to upload a media file and view the generated transcript and ISL animation.
+---
+
+## Repository Structure
+
+```text
+isl-translator/
+│
+├── main.py
+├── requirements.txt
+├── stanza_resources/
+│
+├── templates/
+│   ├── upload.html
+│   └── index.html
+│
+├── static/
+│   ├── css/
+│   ├── js/
+│   ├── uploads/
+│   └── SignFiles/
+```
+
+* **main.py**: Flask app, transcription pipeline, ISL conversion logic
+* **templates/**: Frontend HTML pages
+* **static/**: CSS, JavaScript, uploads, and SiGML sign files
+* **stanza_resources/**: Local Stanza language models
+* **requirements.txt**: Python dependencies
+
+---
+
+## Local Development Setup
+
+> Python 3.9 – 3.11 recommended
+
+### 1. Create and activate a virtual environment
+
+```bash
+python -m venv venv
+venv\Scripts\activate   # Windows
+# source venv/bin/activate   # macOS / Linux
+```
+
+### 2. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Download required language resources
+
+#### Stanza English models
+
+```bash
+python -c "import stanza; stanza.download('en')"
+```
+
+#### spaCy English model
+
+```bash
+python -m spacy download en_core_web_sm
+```
+
+> The first run may take longer as models are downloaded and cached locally.
+
+### 4. Run the application
+
+```bash
+python main.py
+```
+
+The Flask app runs at:
+`http://127.0.0.1:5000`
+
+On first run, **faster-whisper** will automatically download the speech model from Hugging Face. This may take a few minutes.
+
+---
+
+## Dependency Compatibility Notes
+
+* This project requires:
+
+  ```
+  numpy==1.25.x
+  ```
+* Newer NumPy `2.x` versions may cause runtime errors with **PyTorch** and **CTranslate2**
+* If you encounter crashes, reinstall dependencies strictly using `requirements.txt`
+
+---
+
+## Performance Notes
+
+* The application runs on **CPU by default**
+* Transcription speed improves significantly with a **CUDA-enabled GPU**
+* GPU support is optional and not required for correctness
+
+---
 
 ## Roadmap
 
-- Improve ISL grammar rules and phrase-level reordering for more natural signing.
-- Extend language support and experiment with larger or domain-specific Whisper models.
-- Add real-time streaming mode for live events and integrate evaluation metrics with Deaf community feedback.
-
+* Improve ISL grammar rules and phrase-level reordering
+* Add phrase-level and contextual signing
+* Experiment with larger or domain-specific Whisper models
+* Add real-time streaming support for live events
+* Integrate feedback and evaluation from the Deaf community
